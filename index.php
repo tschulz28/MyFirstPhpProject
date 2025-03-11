@@ -108,6 +108,19 @@
             position: absolute;
             left: 8px;
         }
+
+        .delbtn {
+            width: 24px;
+            height: 24px;
+            border: 2px solid white;
+            border-radius:12px;
+            background-color: #990000;
+            position: absolute;
+            right: 6px;
+        }
+        .delbtn:hover {
+            background-color: #CC0000;
+        }
     </style>
 </head>
 <body>
@@ -123,6 +136,7 @@
             <a href="index.php?page=contacts"><img src="img/book.svg"/>Kontakte</a>
             <a href="index.php?page=add_contact"><img src="img/add.svg"/>Kontakt hinzufügen</a>
             <a href="index.php?page=legal"><img src="img/legal.svg"/>Impressum</a>
+            <a href="firststart.php"><img src="img/first_page.svg"/>First Start</a>
         </div>
 
         <div class="content">
@@ -136,8 +150,9 @@
                 // Help to see some details during runtime
                 $debugOut = false;
 
-                // Probable change the headline here accoring the given parameter from menu, 'page=...'
-
+                // -------------------------------------------------------------
+                // Data Management
+                // -------------------------------------------------------------
                 // Read the content of the file and store it in the array.
                 // The file could also be empty.
                 // Having different content in the file should result in errors that are not handled currently.
@@ -188,6 +203,44 @@
                     }
                 }
 
+                // Delete command: index.php?page=contacts&action=delete&name=$name
+                // Call via URL: GET ...
+                if (isset($_GET['page']) && isset($_GET['action']) && isset($_GET['name'])){
+                    if (!empty($_GET['action']) && !empty($_GET['name']) && $_GET['action'] == 'delete'){
+                        // Removing an entry - need to be done during data management:
+                        $name = $_GET['name'];
+                        if ($debugOut == true){
+                            echo 'Removing &apos;<b>' . $name . '</b>&apos;...<br/>';
+                        }
+
+                        // Smart if this could be done by the index of the entry!
+                        foreach ($contacts as $key => $value) {
+                            if ($value['name'] == $name) {
+                                unset($contacts[$key]);
+                                if ($debugOut == true){
+                                    echo 'Removed &apos;<b>' . $name . '</b>&apos; in loop...<br/>';
+                                }
+                            }
+                        }
+
+                        // Newly indexing array
+                        $contacts = array_values($contacts);
+                        if ($debugOut == true){
+                            echo 'Newly indexed array...<br/>';
+                        }
+
+                        file_put_contents($fileName, json_encode($contacts, JSON_PRETTY_PRINT));
+                        if ($debugOut == true){
+                            echo 'Written to file...<br/>';
+                        }
+                }
+                }
+                    
+
+                // -------------------------------------------------------------
+                // UI Management
+                // -------------------------------------------------------------
+                // Probable change the headline here accoring the given parameter from menu, 'page=...'
                 echo '<h1>' . $headline . '</h1>';
                 if (isset($_GET['page'])) {
                     if ($_GET['page'] == 'start'){
@@ -203,14 +256,16 @@
                             foreach ($contacts as $contact){
                                 $name = $contact['name'];
                                 $phone = $contact['phone'];
-                            //     echo '<tr><td>'. $name .'</td><td>' . $phone . '</td></tr>';
-                            // echo '</table>';
+                                //     echo '<tr><td>'. $name .'</td><td>' . $phone . '</td></tr>';
+                                // echo '</table>';
 
-                            // Potentially add an image to remove the entry.
+                                //  Potentially add an image to remove the entry.
+                                // Smart if this could be done by the index of the entry!
                                 echo "
                                 <div class='card'>
                                     <img class='profile-picture' src='img/profile-picture.svg' />
                                     <b>$name</b></br><a href='tel:$phone'><img src='img/call.svg' />$phone</a>
+                                    <a class='delbtn' href='index.php?page=contacts&action=delete&name=$name'><img src='img/remove.svg'/></a>
                                 </div>";
                             }
                         }

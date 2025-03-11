@@ -18,5 +18,12 @@
 
         echo '<p>A small calculation with randomized variables:</br>'. $zahl1 . ' * ' . $zahl2 .' = ' . $zahl1 * $zahl2 . '</p>';
     ?>
+    
+    <button onclick="goBack()">Zurück</button>
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
 </body>
 </html>
