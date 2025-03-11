@@ -3,18 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta author="Thomas Schulz">
     <title>PHP First Steps</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
 
     <style>
+        /* Choose some specific font and background */
         body {
             font-family: "Quicksand";
             background-color: #eaedf8;
             margin: 0px;
         }
 
+        /* Footer of the page */
         .footer {
             padding: 12px;
         text-align: center;
@@ -25,6 +28,7 @@
         width: 100%;
         }
 
+        /* Header of the page */
         .menubar {
             background-color: white;
             position: absolute;
@@ -123,29 +127,64 @@
 
         <div class="content">
             <?php
+                // Some general headline
                 $headline = 'Herzlich willkommen!';
+                // Storage file for entered contacts
                 $fileName = 'contacts.txt';
+                // Storage array for contacts
                 $contacts = [];
+                // Help to see some details during runtime
                 $debugOut = false;
 
+                // Probable change the headline here accoring the given parameter from menu, 'page=...'
+
+                // Read the content of the file and store it in the array.
+                // The file could also be empty.
+                // Having different content in the file should result in errors that are not handled currently.
                 if (file_exists($fileName)){
                     $contactsFromFile = file_get_contents($fileName, true);
                     $contacts = json_decode($contactsFromFile, true);
                 }
 
+                // If there is some feedback via POST message, handle it here
                 if (isset($_POST['name']) && isset($_POST['phone'])){
                     if ($debugOut == true){
-                        echo 'Contact <b>' . $_POST['name'] . '</b> was sent...';
+                        echo 'Contact &apos;<b>' . $_POST['name'] . '</b>&apos; was sent...<br/>';
                     }
 
-                    $newContact = [
-                        'name' => $_POST['name'],
-                        'phone' => $_POST['phone']
-                    ];
-                    array_push($contacts, $newContact);
-                    file_put_contents($fileName, json_encode($contacts, JSON_PRETTY_PRINT));
-                    if ($debugOut == true){
-                        echo 'Contact <b>' . $_POST['name'] . '</b> was stored...';
+                    // Check for missing input
+                    if (!empty($_POST['name']) && !empty($_POST['phone']))
+                    {
+                        // Check for correct phone number - should be numeric
+                        $phone = $_POST['phone'];
+                        if ($debugOut == true){
+                            echo 'Verifying given phone number &apos;<b>' . $phone . '</b>&apos;...<br/>';
+                        }
+
+                        // Remove separator characters
+                        $phone = str_replace("/", "", $phone);
+                        $phone = str_replace(" ", "", $phone);
+                        $phone = str_replace("+", "", $phone);
+
+                        if (is_numeric($phone))
+                        {
+                            // Create a new contact, add it to the array and store the whole array in the file
+                            $newContact = [
+                                'name' => $_POST['name'],
+                                'phone' => $_POST['phone']
+                            ];
+                            array_push($contacts, $newContact);
+                            file_put_contents($fileName, json_encode($contacts, JSON_PRETTY_PRINT));
+                            if ($debugOut == true){
+                                echo 'Contact <b>' . $_POST['name'] . '</b> was stored...';
+                            }
+                        }
+                        else {
+                            echo '<b><i>The given phone number cannot be recognized as nummeric value. Entry will be skipped. Please retry again.</i></b>';
+                        }
+                    }
+                    else {
+                        echo '<b><i>Either no name or no phone number were given. Entry will be skipped. Please retry again.</i></b>';
                     }
                 }
 
@@ -160,17 +199,20 @@
                         ";
 
                         // echo '<table><tr><th>Name</th><th>Phone</th></tr>';
+                        if (!empty($contacts)) {
+                            foreach ($contacts as $contact){
+                                $name = $contact['name'];
+                                $phone = $contact['phone'];
+                            //     echo '<tr><td>'. $name .'</td><td>' . $phone . '</td></tr>';
+                            // echo '</table>';
 
-                        foreach ($contacts as $contact){
-                            $name = $contact['name'];
-                            $phone = $contact['phone'];
-                        //     echo '<tr><td>'. $name .'</td><td>' . $phone . '</td></tr>';
-                        // echo '</table>';
-                            echo "
-                            <div class='card'>
-                                <img class='profile-picture' src='img/profile-picture.svg' />
-                                <b>$name</b></br><a href='tel:$phone'><img src='img/call.svg' />$phone</a>
-                            </div>";
+                            // Potentially add an image to remove the entry.
+                                echo "
+                                <div class='card'>
+                                    <img class='profile-picture' src='img/profile-picture.svg' />
+                                    <b>$name</b></br><a href='tel:$phone'><img src='img/call.svg' />$phone</a>
+                                </div>";
+                            }
                         }
                     }
                     else if ($_GET['page'] == 'add_contact'){
@@ -183,7 +225,6 @@
                         </form>
                         ";
                     }
-
                 }
             ?>
         </div>
