@@ -1,0 +1,14 @@
+[
+    {
+        "name": "Thomas Schulz",
+        "phone": "01520 48 555 63"
+    },
+    {
+        "name": "Petra Schulz",
+        "phone": "04933 69 799 37"
+    },
+    {
+        "name": "Maren Schulz",
+        "phone": "01523 45 67 89 0"
+    }
+]
